@@ -42,6 +42,35 @@ function saveSellerSettings() {
   toast('Settings saved');
 }
 
+function exportSellerSettings() {
+  const data = storage.getSeller();
+  if (!data.name) { toast('Nothing to export yet', 'warning'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  a.download = 'my-seller-settings.json';
+  a.click();
+}
+
+function importSellerSettings() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      storage.saveSeller(data);
+      loadSellerForm();
+      updateSellerDisplay();
+      toast('Settings imported');
+    } catch {
+      alert('Invalid JSON file');
+    }
+  };
+  input.click();
+}
+
 // ── Client helpers ───────────────────────────────────────
 const CLIENT_FIELDS = ['name','email','address','city','country','reg_number','vat_number'];
 
