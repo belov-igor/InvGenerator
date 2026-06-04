@@ -1,0 +1,13 @@
+{
+  "name": "Your Full Name",
+  "address": "Street Address",
+  "city": "City 11000",
+  "country": "Serbia",
+  "pib": "123456789",
+  "maticni_broj": "1234567890123",
+  "iban": "RS35 1234 0000 0123 4567 89",
+  "swift": "BANKRSBG",
+  "bank": "Bank Name, Serbia",
+  "email": "your@email.com",
+  "phone": "+381 60 123 4567"
+}

@@ -1,0 +1,19 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+dist/
+
+# Personal data — never commit
+cli/settings.json
+cli/clients/*.json
+!cli/clients/.gitkeep
+cli/invoices/*.pdf
+!cli/invoices/.gitkeep
+
+# IDE / OS
+.idea/
+.DS_Store
