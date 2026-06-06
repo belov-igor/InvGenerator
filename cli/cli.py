@@ -12,17 +12,28 @@ def cli():
 
 
 @cli.command()
-@click.option("--client", "-c", required=True,
-              help="Client name (from clients/) or path to JSON file")
-@click.option("--number", "-n", required=True,
-              help="Invoice number, e.g. 2026-001")
-@click.option("--date", "-d", "inv_date", default=str(date.today()),
-              show_default=True, help="Invoice date (YYYY-MM-DD)")
-@click.option("--due-days", default=14, show_default=True,
-              help="Days until due")
+@click.option(
+    "--client",
+    "-c",
+    required=True,
+    help="Client name (from clients/) or path to JSON file",
+)
+@click.option("--number", "-n", required=True, help="Invoice number, e.g. 2026-001")
+@click.option(
+    "--date",
+    "-d",
+    "inv_date",
+    default=str(date.today()),
+    show_default=True,
+    help="Invoice date (YYYY-MM-DD)",
+)
+@click.option("--due-days", default=14, show_default=True, help="Days until due")
 @click.option("--currency", default="EUR", show_default=True)
-@click.option("--notes", default="VAT not applicable – export of services (B2B)",
-              help="Footer notes")
+@click.option(
+    "--notes",
+    default="VAT not applicable – export of services (B2B)",
+    help="Footer notes",
+)
 @click.option("--reference", "-r", default="", help="Payment reference number")
 @click.option("--output", "-o", default=None, help="Output PDF path")
 def create(client, number, inv_date, due_days, currency, notes, reference, output):
@@ -57,7 +68,9 @@ def create(client, number, inv_date, due_days, currency, notes, reference, outpu
         quantity = click.prompt("  Quantity", type=float, default=1.0)
         unit = click.prompt("  Unit", default="service")
         rate = click.prompt("  Rate", type=float)
-        items.append(LineItem(description=description, quantity=quantity, unit=unit, rate=rate))
+        items.append(
+            LineItem(description=description, quantity=quantity, unit=unit, rate=rate)
+        )
         click.echo(f"  → {currency} {quantity * rate:.2f}\n")
 
     invoice = Invoice(
