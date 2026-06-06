@@ -97,6 +97,7 @@ function refreshClientDropdown(selectName = null) {
     if (name === prev) opt.selected = true;
     dd.appendChild(opt);
   });
+  document.getElementById('btn-load-client').disabled = !dd.value;
 }
 
 function loadSelectedClient() {
