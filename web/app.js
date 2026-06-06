@@ -224,8 +224,8 @@ function generatePDF() {
 
   const sellerAddr = [seller.address, seller.city, seller.country].filter(Boolean).join('\n');
   const sellerExtra = [
-    seller.pib        ? `PIB: ${seller.pib}` : null,
-    seller.maticni_broj ? `Matični broj: ${seller.maticni_broj}` : null,
+    seller.pib          ? `Tax ID: ${seller.pib}` : null,
+    seller.maticni_broj ? `Reg. No: ${seller.maticni_broj}` : null,
     seller.bank       || null,
     seller.iban       ? `IBAN: ${seller.iban}` : null,
     seller.swift      ? `SWIFT: ${seller.swift}` : null,
@@ -278,6 +278,7 @@ function generatePDF() {
         columns: [
           {
             stack: [
+              { text: 'From:', fontSize: 9.5, color: GREY, margin: [0, 0, 0, 2] },
               { text: seller.name, bold: true, fontSize: 9.5 },
               ...(sellerAddr  ? [{ text: sellerAddr,  fontSize: 9.5, color: GREY, margin: [0, 2, 0, 0], lineHeight: 1.6 }] : []),
               ...(sellerExtra ? [{ text: sellerExtra, fontSize: 9.5, color: GREY, lineHeight: 1.6 }] : []),
@@ -286,7 +287,8 @@ function generatePDF() {
           },
           {
             stack: [
-              { text: 'Bill to', bold: true, fontSize: 9.5, margin: [0, 0, 0, 2] },
+              { text: 'Bill to:', fontSize: 9.5, color: GREY, margin: [0, 0, 0, 2] },
+              { text: client.name, bold: true, fontSize: 9.5, margin: [0, 0, 0, 2] },
               { text: clientAddr, fontSize: 9.5, color: GREY, lineHeight: 1.6 },
             ],
             width: '*',
@@ -294,8 +296,6 @@ function generatePDF() {
         ],
         margin: [0, 0, 0, 28],
       },
-      // Amount due headline
-      { text: `${currency} ${fmtNum(total)} due ${fmtDate(dueDate)}`, fontSize: 16, bold: true, margin: [0, 0, 0, 28] },
       // Items table
       {
         table: {

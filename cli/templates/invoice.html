@@ -33,13 +33,7 @@
   .parties td { vertical-align: top; width: 50%; font-size: 9.5pt; line-height: 1.6; padding-right: 16px; color: #555; }
 
   .party-name { font-weight: 700; color: #111; }
-  .party-label { font-weight: 700; color: #111; margin-bottom: 2px; }
-
-  .amount-due {
-    font-size: 16pt;
-    font-weight: 700;
-    margin-bottom: 28px;
-  }
+  .party-label { color: #555; margin-bottom: 2px; }
 
   .items {
     width: 100%;
@@ -108,12 +102,13 @@
   <table>
     <tr>
       <td>
+        <div class="party-label">From:</div>
         <div class="party-name">{{ invoice.seller.name }}</div>
         {{ invoice.seller.address }}<br>
         {{ invoice.seller.city }}<br>
         {{ invoice.seller.country }}
-        {% if invoice.seller.pib %}<br>PIB: {{ invoice.seller.pib }}{% endif %}
-        {% if invoice.seller.maticni_broj %}<br>Matični broj: {{ invoice.seller.maticni_broj }}{% endif %}
+        {% if invoice.seller.pib %}<br>Tax ID: {{ invoice.seller.pib }}{% endif %}
+        {% if invoice.seller.maticni_broj %}<br>Reg. No: {{ invoice.seller.maticni_broj }}{% endif %}
         {% if invoice.seller.bank %}<br>{{ invoice.seller.bank }}{% endif %}
         {% if invoice.seller.iban %}<br>IBAN: {{ invoice.seller.iban }}{% endif %}
         {% if invoice.seller.swift %}<br>SWIFT: {{ invoice.seller.swift }}{% endif %}
@@ -121,8 +116,8 @@
         {% if invoice.seller.phone %}<br>{{ invoice.seller.phone }}{% endif %}
       </td>
       <td>
-        <div class="party-label">Bill to</div>
-        {{ invoice.client.name }}<br>
+        <div class="party-label">Bill to:</div>
+        <div class="party-name">{{ invoice.client.name }}</div>
         {{ invoice.client.address }}<br>
         {{ invoice.client.city }}<br>
         {{ invoice.client.country }}
@@ -133,8 +128,6 @@
     </tr>
   </table>
 </div>
-
-<div class="amount-due">{{ invoice.currency }} {{ "%.2f"|format(invoice.total) }} due {{ invoice.due_date.strftime('%B %d, %Y') }}</div>
 
 <table class="items">
   <thead>
