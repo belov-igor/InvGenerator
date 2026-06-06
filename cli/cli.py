@@ -23,8 +23,9 @@ def cli():
 @click.option("--currency", default="EUR", show_default=True)
 @click.option("--notes", default="VAT not applicable – export of services (B2B)",
               help="Footer notes")
+@click.option("--reference", "-r", default="", help="Payment reference number")
 @click.option("--output", "-o", default=None, help="Output PDF path")
-def create(client, number, inv_date, due_days, currency, notes, output):
+def create(client, number, inv_date, due_days, currency, notes, reference, output):
     """Create a new invoice interactively."""
     try:
         seller = Seller.from_file()
@@ -68,6 +69,7 @@ def create(client, number, inv_date, due_days, currency, notes, output):
         items=items,
         currency=currency,
         notes=notes,
+        reference=reference,
     )
 
     click.echo(f"\nTotal: {currency} {invoice.total:.2f}")

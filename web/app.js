@@ -204,11 +204,12 @@ function generatePDF() {
     return;
   }
 
-  const number   = document.getElementById('inv-number').value.trim();
-  const invDate  = document.getElementById('inv-date').value;
-  const dueDate  = document.getElementById('due-date').value;
-  const currency = document.getElementById('currency').value;
-  const notes    = document.getElementById('notes').value.trim();
+  const number    = document.getElementById('inv-number').value.trim();
+  const invDate   = document.getElementById('inv-date').value;
+  const dueDate   = document.getElementById('due-date').value;
+  const currency  = document.getElementById('currency').value;
+  const reference = document.getElementById('reference').value.trim();
+  const notes     = document.getElementById('notes').value.trim();
   const client   = getClientForm();
   const items    = getItems();
 
@@ -221,6 +222,16 @@ function generatePDF() {
   const LGREY = '#999999';
 
   const sellerAddr = [seller.address, seller.city, seller.country].filter(Boolean).join('\n');
+  const sellerExtra = [
+    seller.pib        ? `PIB: ${seller.pib}` : null,
+    seller.maticni_broj ? `Matični broj: ${seller.maticni_broj}` : null,
+    seller.bank       || null,
+    seller.iban       ? `IBAN: ${seller.iban}` : null,
+    seller.swift      ? `SWIFT: ${seller.swift}` : null,
+    seller.email      || null,
+    seller.phone      || null,
+  ].filter(Boolean).join('\n');
+
   const clientAddr = [
     client.address, client.city, client.country,
     client.reg_number ? `Reg. No: ${client.reg_number}` : null,
@@ -235,12 +246,6 @@ function generatePDF() {
     { text: fmtNum(item.rate), alignment: 'right', fontSize: 9.5 },
     { text: fmtNum(item.quantity * item.rate), alignment: 'right', fontSize: 9.5 },
   ]);
-
-  const payRows = [
-    seller.bank  ? [{ text: 'Bank',      fontSize: 9, color: GREY }, { text: seller.bank,  fontSize: 9 }] : null,
-    seller.iban  ? [{ text: 'IBAN',      fontSize: 9, color: GREY }, { text: seller.iban,  fontSize: 9 }] : null,
-    seller.swift ? [{ text: 'SWIFT/BIC', fontSize: 9, color: GREY }, { text: seller.swift, fontSize: 9 }] : null,
-  ].filter(Boolean);
 
   const docDef = {
     pageSize: 'A4',
@@ -257,6 +262,7 @@ function generatePDF() {
             [{ text: 'Invoice number', fontSize: 9.5, color: GREY }, { text: number,           fontSize: 9.5 }],
             [{ text: 'Date of issue',  fontSize: 9.5, color: GREY }, { text: fmtDate(invDate), fontSize: 9.5 }],
             [{ text: 'Date due',       fontSize: 9.5, color: GREY }, { text: fmtDate(dueDate), fontSize: 9.5 }],
+            ...(reference ? [[{ text: 'Reference', fontSize: 9.5, color: GREY }, { text: reference, fontSize: 9.5 }]] : []),
           ]
         },
         layout: {
@@ -272,8 +278,8 @@ function generatePDF() {
           {
             stack: [
               { text: seller.name, bold: true, fontSize: 9.5 },
-              ...(sellerAddr ? [{ text: sellerAddr, fontSize: 9.5, color: GREY, margin: [0, 2, 0, 0], lineHeight: 1.6 }] : []),
-              ...(seller.phone ? [{ text: seller.phone, fontSize: 9.5, color: GREY }] : []),
+              ...(sellerAddr  ? [{ text: sellerAddr,  fontSize: 9.5, color: GREY, margin: [0, 2, 0, 0], lineHeight: 1.6 }] : []),
+              ...(sellerExtra ? [{ text: sellerExtra, fontSize: 9.5, color: GREY, lineHeight: 1.6 }] : []),
             ],
             width: '*',
           },
@@ -348,24 +354,6 @@ function generatePDF() {
         { text: 'Notes', bold: true, fontSize: 9.5, margin: [0, 0, 0, 4] },
         { text: notes, fontSize: 9, color: GREY, lineHeight: 1.6, margin: [0, 0, 0, 16] },
       ] : []),
-      // Payment details
-      ...(payRows.length ? [
-        { text: 'Payment Details', bold: true, fontSize: 9.5, margin: [0, 0, 0, 4] },
-        {
-          table: { body: payRows },
-          layout: {
-            hLineWidth: () => 0, vLineWidth: () => 0,
-            paddingLeft: () => 0, paddingRight: () => 16,
-            paddingTop: () => 1, paddingBottom: () => 1,
-          },
-          margin: [0, 0, 0, 16],
-        },
-      ] : []),
-      // Footer IDs
-      ...(seller.pib ? [{
-        text: `PIB: ${seller.pib}` + (seller.maticni_broj ? `  ·  Matični broj: ${seller.maticni_broj}` : ''),
-        fontSize: 8, color: '#aaaaaa', alignment: 'center', margin: [0, 12, 0, 0],
-      }] : []),
     ],
     styles: {
       th: { fontSize: 9, color: '#555555' },

@@ -77,6 +77,7 @@ class Invoice:
     items: list
     currency: str = "EUR"
     notes: str = "VAT not applicable – export of services (B2B)"
+    reference: str = ""
 
     @property
     def total(self) -> float:
@@ -86,7 +87,8 @@ class Invoice:
 def generate_pdf(invoice: Invoice, output_path: Optional[Path] = None) -> Path:
     INVOICES_DIR.mkdir(exist_ok=True)
     if output_path is None:
-        output_path = INVOICES_DIR / f"invoice-{invoice.number}.pdf"
+        safe = invoice.number.replace("/", "-").replace(" ", "-")
+        output_path = INVOICES_DIR / f"invoice-{safe}.pdf"
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
     html = env.get_template("invoice.html").render(invoice=invoice)

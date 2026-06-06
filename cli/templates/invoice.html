@@ -100,6 +100,7 @@
     <tr><td>Invoice number</td><td>{{ invoice.number }}</td></tr>
     <tr><td>Date of issue</td><td>{{ invoice.date.strftime('%B %d, %Y') }}</td></tr>
     <tr><td>Date due</td><td>{{ invoice.due_date.strftime('%B %d, %Y') }}</td></tr>
+    {% if invoice.reference %}<tr><td>Reference</td><td>{{ invoice.reference }}</td></tr>{% endif %}
   </table>
 </div>
 
@@ -111,6 +112,11 @@
         {{ invoice.seller.address }}<br>
         {{ invoice.seller.city }}<br>
         {{ invoice.seller.country }}
+        {% if invoice.seller.pib %}<br>PIB: {{ invoice.seller.pib }}{% endif %}
+        {% if invoice.seller.maticni_broj %}<br>Matični broj: {{ invoice.seller.maticni_broj }}{% endif %}
+        {% if invoice.seller.bank %}<br>{{ invoice.seller.bank }}{% endif %}
+        {% if invoice.seller.iban %}<br>IBAN: {{ invoice.seller.iban }}{% endif %}
+        {% if invoice.seller.swift %}<br>SWIFT: {{ invoice.seller.swift }}{% endif %}
         {% if invoice.seller.email %}<br>{{ invoice.seller.email }}{% endif %}
         {% if invoice.seller.phone %}<br>{{ invoice.seller.phone }}{% endif %}
       </td>
@@ -168,24 +174,6 @@
 </div>
 {% endif %}
 
-{% if invoice.seller.iban or invoice.seller.bank %}
-<div class="section">
-  <div class="section-label">Payment Details</div>
-  <div class="section-body">
-    <table class="pay-table">
-      {% if invoice.seller.bank %}<tr><td>Bank</td><td>{{ invoice.seller.bank }}</td></tr>{% endif %}
-      {% if invoice.seller.iban %}<tr><td>IBAN</td><td>{{ invoice.seller.iban }}</td></tr>{% endif %}
-      {% if invoice.seller.swift %}<tr><td>SWIFT/BIC</td><td>{{ invoice.seller.swift }}</td></tr>{% endif %}
-    </table>
-  </div>
-</div>
-{% endif %}
-
-{% if invoice.seller.pib %}
-<div class="footer">
-  PIB: {{ invoice.seller.pib }}{% if invoice.seller.maticni_broj %} &nbsp;·&nbsp; Matični broj: {{ invoice.seller.maticni_broj }}{% endif %}
-</div>
-{% endif %}
 
 </body>
 </html>
