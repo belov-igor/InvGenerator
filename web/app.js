@@ -217,16 +217,15 @@ function generatePDF() {
   if (!items.length) { alert('Add at least one line item.'); return; }
 
   const total = items.reduce((s, i) => s + i.quantity * i.rate, 0);
-  const DARK  = '#1a1a2e';
-  const GREY  = '#666666';
-  const LGREY = '#aaaaaa';
+  const GREY  = '#555555';
+  const LGREY = '#999999';
 
   const sellerAddr = [seller.address, seller.city, seller.country].filter(Boolean).join('\n');
-  const clientAddr = [client.address, client.city, client.country].filter(Boolean).join('\n');
-  const clientMeta = [
+  const clientAddr = [
+    client.address, client.city, client.country,
     client.reg_number ? `Reg. No: ${client.reg_number}` : null,
     client.vat_number ? `VAT: ${client.vat_number}` : null,
-    client.email      || null,
+    client.email || null,
   ].filter(Boolean).join('\n');
 
   const itemRows = items.map(item => [
@@ -237,140 +236,139 @@ function generatePDF() {
     { text: fmtNum(item.quantity * item.rate), alignment: 'right', fontSize: 9.5 },
   ]);
 
-  function noteBox(label, content) {
-    return {
-      table: {
-        widths: [3, '*'],
-        body: [[
-          { text: '', fillColor: DARK, border: [false,false,false,false] },
-          {
-            stack: [
-              { text: label, fontSize: 7.5, color: LGREY, bold: true, characterSpacing: 1.5, margin: [0, 0, 0, 5] },
-              ...(Array.isArray(content) ? content : [{ text: content, fontSize: 9, color: '#555555' }])
-            ],
-            fillColor: '#f5f5f5',
-            border: [false,false,false,false],
-            margin: [12, 10, 12, 10],
-          }
-        ]]
-      },
-      layout: 'noBorders',
-      margin: [0, 0, 0, 10],
-    };
-  }
-
   const payRows = [
-    seller.bank  ? [{ text: 'Bank',      fontSize: 8.5, color: LGREY }, { text: seller.bank,  fontSize: 9, color: '#555' }] : null,
-    seller.iban  ? [{ text: 'IBAN',      fontSize: 8.5, color: LGREY }, { text: seller.iban,  fontSize: 9, color: '#555' }] : null,
-    seller.swift ? [{ text: 'SWIFT/BIC', fontSize: 8.5, color: LGREY }, { text: seller.swift, fontSize: 9, color: '#555' }] : null,
+    seller.bank  ? [{ text: 'Bank',      fontSize: 9, color: GREY }, { text: seller.bank,  fontSize: 9 }] : null,
+    seller.iban  ? [{ text: 'IBAN',      fontSize: 9, color: GREY }, { text: seller.iban,  fontSize: 9 }] : null,
+    seller.swift ? [{ text: 'SWIFT/BIC', fontSize: 9, color: GREY }, { text: seller.swift, fontSize: 9 }] : null,
   ].filter(Boolean);
 
   const docDef = {
     pageSize: 'A4',
-    pageMargins: [56, 56, 56, 70],
-    defaultStyle: { font: 'Helvetica' },
+    pageMargins: [60, 60, 60, 70],
+    defaultStyle: { font: 'Helvetica', fontSize: 10, color: '#111111', lineHeight: 1.4 },
     content: [
-      // Header
+      // Title
+      { text: 'Invoice', fontSize: 24, bold: true, margin: [0, 0, 0, 14] },
+      // Invoice meta
       {
-        columns: [
-          {
-            stack: [
-              { text: seller.name, fontSize: 20, bold: true, color: DARK },
-              sellerAddr ? { text: sellerAddr, fontSize: 9, color: GREY, margin: [0, 5, 0, 0], lineHeight: 1.5 } : {},
-              seller.email ? { text: seller.email, fontSize: 9, color: GREY } : {},
-              seller.phone ? { text: seller.phone, fontSize: 9, color: GREY } : {},
-            ]
-          },
-          {
-            stack: [
-              { text: 'INVOICE', fontSize: 28, color: DARK, alignment: 'right', characterSpacing: 3 },
-              { text: `No. ${number}`, fontSize: 9.5, color: LGREY, alignment: 'right', margin: [0, 4, 0, 0] },
-            ]
-          }
-        ]
+        table: {
+          widths: [100, '*'],
+          body: [
+            [{ text: 'Invoice number', fontSize: 9.5, color: GREY }, { text: number,           fontSize: 9.5 }],
+            [{ text: 'Date of issue',  fontSize: 9.5, color: GREY }, { text: fmtDate(invDate), fontSize: 9.5 }],
+            [{ text: 'Date due',       fontSize: 9.5, color: GREY }, { text: fmtDate(dueDate), fontSize: 9.5 }],
+          ]
+        },
+        layout: {
+          hLineWidth: () => 0, vLineWidth: () => 0,
+          paddingLeft: () => 0, paddingRight: () => 0,
+          paddingTop: () => 1, paddingBottom: () => 1,
+        },
+        margin: [0, 0, 0, 28],
       },
-      // Divider
-      { canvas: [{ type: 'line', x1: 0, y1: 8, x2: 483, y2: 8, lineWidth: 2, lineColor: DARK }], margin: [0, 8, 0, 20] },
-      // Bill To + Invoice info
+      // Seller + Bill to
       {
         columns: [
           {
             stack: [
-              { text: 'BILL TO', fontSize: 8, color: LGREY, bold: true, characterSpacing: 1.5 },
-              { text: client.name, fontSize: 12, bold: true, color: DARK, margin: [0, 5, 0, 3] },
-              clientAddr ? { text: clientAddr, fontSize: 9, color: GREY, lineHeight: 1.5 } : {},
-              clientMeta ? { text: clientMeta, fontSize: 9, color: GREY, lineHeight: 1.5, margin: [0, 2, 0, 0] } : {},
+              { text: seller.name, bold: true, fontSize: 9.5 },
+              ...(sellerAddr ? [{ text: sellerAddr, fontSize: 9.5, color: GREY, margin: [0, 2, 0, 0], lineHeight: 1.6 }] : []),
+              ...(seller.phone ? [{ text: seller.phone, fontSize: 9.5, color: GREY }] : []),
             ],
             width: '*',
           },
           {
-            table: {
-              body: [
-                [{ text: 'Date',     fontSize: 8, color: LGREY, bold: true }, { text: fmtDate(invDate), bold: true, color: DARK }],
-                [{ text: 'Due Date', fontSize: 8, color: LGREY, bold: true }, { text: fmtDate(dueDate), bold: true, color: DARK }],
-                [{ text: 'Currency', fontSize: 8, color: LGREY, bold: true }, { text: currency, bold: true, color: DARK }],
-              ]
-            },
-            layout: 'noBorders',
-            width: 'auto',
-          }
+            stack: [
+              { text: 'Bill to', bold: true, fontSize: 9.5, margin: [0, 0, 0, 2] },
+              { text: clientAddr, fontSize: 9.5, color: GREY, lineHeight: 1.6 },
+            ],
+            width: '*',
+          },
         ],
-        margin: [0, 0, 0, 24],
+        margin: [0, 0, 0, 28],
       },
+      // Amount due headline
+      { text: `${currency} ${fmtNum(total)} due ${fmtDate(dueDate)}`, fontSize: 16, bold: true, margin: [0, 0, 0, 28] },
       // Items table
       {
         table: {
           headerRows: 1,
-          widths: ['*', 45, 52, 65, 65],
+          widths: ['*', 40, 52, 65, 65],
           body: [
             [
-              { text: 'DESCRIPTION', style: 'th' },
-              { text: 'QTY',    style: 'th', alignment: 'right' },
-              { text: 'UNIT',   style: 'th' },
-              { text: 'RATE',   style: 'th', alignment: 'right' },
-              { text: 'AMOUNT', style: 'th', alignment: 'right' },
+              { text: 'Description', style: 'th' },
+              { text: 'Qty',        style: 'th', alignment: 'right' },
+              { text: 'Unit',       style: 'th' },
+              { text: 'Unit price', style: 'th', alignment: 'right' },
+              { text: 'Amount',     style: 'th', alignment: 'right' },
             ],
             ...itemRows,
           ]
         },
         layout: {
-          hLineWidth: (i) => i <= 1 ? 0 : 0.5,
-          vLineWidth: ()  => 0,
-          hLineColor: ()  => '#ececec',
-          fillColor:  (i) => i === 0 ? DARK : (i % 2 === 0 ? '#f8f8f8' : null),
-          paddingLeft:   () => 10,
-          paddingRight:  () => 10,
-          paddingTop:    () => 8,
-          paddingBottom: () => 8,
+          hLineWidth: (i, node) => (i === 0) ? 0 : (i === 1 || i === node.table.body.length) ? 1 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: (i) => i === 1 ? '#bbbbbb' : '#e0e0e0',
+          paddingLeft:   () => 0,
+          paddingRight:  (i, node) => i === node.table.widths.length - 1 ? 0 : 8,
+          paddingTop:    (i) => i === 0 ? 6 : 10,
+          paddingBottom: (i) => i === 0 ? 6 : 10,
         },
-        margin: [0, 0, 0, 12],
+        margin: [0, 0, 0, 16],
       },
-      // Total
+      // Totals
       {
         columns: [
           { text: '', width: '*' },
           {
-            stack: [
-              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 2, lineColor: DARK }] },
-              { text: `Total   ${currency} ${fmtNum(total)}`, fontSize: 13, bold: true, color: DARK, alignment: 'right', margin: [0, 7, 0, 0] },
-            ],
-            width: 200,
-          }
+            table: {
+              widths: ['*', 'auto'],
+              body: [
+                [{ text: 'Subtotal',   fontSize: 9.5, color: GREY }, { text: `${currency} ${fmtNum(total)}`, fontSize: 9.5, alignment: 'right' }],
+                [{ text: 'Total',      fontSize: 9.5, color: GREY }, { text: `${currency} ${fmtNum(total)}`, fontSize: 9.5, alignment: 'right' }],
+                [{ text: 'Amount due', fontSize: 9.5, bold: true   }, { text: `${currency} ${fmtNum(total)}`, fontSize: 9.5, bold: true, alignment: 'right' }],
+              ]
+            },
+            layout: {
+              hLineWidth: (i) => i === 2 ? 1 : 0,
+              vLineWidth: () => 0,
+              hLineColor: () => '#bbbbbb',
+              paddingLeft:   () => 24,
+              paddingRight:  () => 0,
+              paddingTop:    (i) => i === 2 ? 8 : 3,
+              paddingBottom: () => 3,
+            },
+            width: 210,
+          },
         ],
-        margin: [0, 4, 0, 28],
+        margin: [0, 0, 0, 28],
       },
       // Notes
-      ...(notes ? [noteBox('NOTES', notes)] : []),
+      ...(notes ? [
+        { text: 'Notes', bold: true, fontSize: 9.5, margin: [0, 0, 0, 4] },
+        { text: notes, fontSize: 9, color: GREY, lineHeight: 1.6, margin: [0, 0, 0, 16] },
+      ] : []),
       // Payment details
-      ...(payRows.length ? [noteBox('PAYMENT DETAILS', [{ table: { body: payRows }, layout: 'noBorders' }])] : []),
+      ...(payRows.length ? [
+        { text: 'Payment Details', bold: true, fontSize: 9.5, margin: [0, 0, 0, 4] },
+        {
+          table: { body: payRows },
+          layout: {
+            hLineWidth: () => 0, vLineWidth: () => 0,
+            paddingLeft: () => 0, paddingRight: () => 16,
+            paddingTop: () => 1, paddingBottom: () => 1,
+          },
+          margin: [0, 0, 0, 16],
+        },
+      ] : []),
       // Footer IDs
       ...(seller.pib ? [{
         text: `PIB: ${seller.pib}` + (seller.maticni_broj ? `  ·  Matični broj: ${seller.maticni_broj}` : ''),
-        fontSize: 8, color: '#cccccc', alignment: 'center', margin: [0, 10, 0, 0],
+        fontSize: 8, color: '#aaaaaa', alignment: 'center', margin: [0, 12, 0, 0],
       }] : []),
     ],
     styles: {
-      th: { fontSize: 8, bold: true, color: '#ffffff' },
+      th: { fontSize: 9, color: '#555555' },
     },
   };
 

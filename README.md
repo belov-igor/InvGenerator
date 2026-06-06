@@ -2,7 +2,7 @@
 
 Invoice generator for freelancers and sole proprietors. Two independent implementations in one repo:
 
-- **`cli/`** — Python CLI for local use, generates PDF via WeasyPrint
+- **`cli/`** — Python CLI, generates PDF via headless Chromium (Playwright)
 - **`web/`** — Static JS app hosted on GitHub Pages, generates PDF in the browser via pdfmake
 
 **Live app:** https://belov-igor.github.io/InvGenerator/
@@ -23,14 +23,21 @@ No installation needed. Open the link above, fill in your seller details in ⚙ 
 
 Generates a PDF invoice from a client JSON card and interactive prompts.
 
-### Requirements
+### Installation
+
+**With uv (recommended):**
 
 ```bash
-# macOS — pango is required by WeasyPrint
-brew install pango
+uv sync
+uv run playwright install chromium
+```
 
-# Python dependencies
-pip install -r cli/requirements.txt
+**With pip:**
+
+```bash
+python -m venv .venv
+.venv/bin/pip install -r cli/requirements.txt
+.venv/bin/playwright install chromium
 ```
 
 ### Setup
@@ -43,27 +50,25 @@ cp cli/settings.example.json cli/settings.json
 ### Usage
 
 ```bash
-cd cli
-
 # Create a client card
-cat > clients/acme-ou.json << 'EOF'
+cat > cli/clients/my-client.json << 'EOF'
 {
-  "name": "Acme OÜ",
-  "address": "Tallinn Street 42",
-  "city": "Tallinn 10001",
-  "country": "Estonia",
+  "name": "Example Corp Ltd",
+  "address": "123 Business Street",
+  "city": "City 10001",
+  "country": "Country",
   "reg_number": "12345678",
-  "vat_number": "EE123456789",
-  "email": "accounting@acme.ee"
+  "vat_number": "VAT123456789",
+  "email": "billing@example.com"
 }
 EOF
 
 # Generate invoice (interactive line items)
-./inv create --client acme-ou --number 2026-001
+./cli/inv create --client my-client --number 2026-001
 
 # Options
-./inv create --client acme-ou --number 2026-001 --date 2026-06-01 --due-days 30
-./inv list-clients
+./cli/inv create --client my-client --number 2026-001 --date 2026-06-01 --due-days 30
+./cli/inv list-clients
 ```
 
 PDF is saved to `cli/invoices/invoice-<number>.pdf`.
@@ -73,7 +78,7 @@ PDF is saved to `cli/invoices/invoice-<number>.pdf`.
 `cli/settings.json` — your seller info:
 
 | Field | Description |
-|---|---|
+| --- | --- |
 | `name` | Full name or company name |
 | `address` | Street address |
 | `city` | City and postal code |
@@ -93,18 +98,19 @@ PDF is saved to `cli/invoices/invoice-<number>.pdf`.
 ```
 InvGenerator/
   cli/
-    generator.py          # dataclasses + PDF generation (WeasyPrint)
+    generator.py          # dataclasses + PDF generation (Playwright)
     cli.py                # Click CLI
-    inv                   # wrapper script (sets DYLD_LIBRARY_PATH on macOS)
+    inv                   # wrapper script
     templates/
-      invoice.html        # Jinja2 PDF template
+      invoice.html        # Jinja2 template
     settings.example.json
-    requirements.txt
+    requirements.txt      # for pip-based install
     clients/              # saved client cards (gitignored)
     invoices/             # generated PDFs (gitignored)
   web/
     index.html            # Bootstrap form
     app.js                # pdfmake + localStorage logic
+  pyproject.toml          # dependencies for uv
   .github/workflows/
     deploy.yml            # auto-deploy web/ to GitHub Pages on push
 ```
@@ -113,6 +119,6 @@ InvGenerator/
 
 ## Invoice design
 
-Clean A4 layout: seller info + "INVOICE" header, bill-to block, items table with alternating rows, total, notes box with VAT disclaimer, payment details, PIB/Matični broj footer.
+Minimalist A4 layout: bold "Invoice" heading, invoice metadata, seller + bill-to columns, amount due line, items table with thin rules, totals block, notes and payment details as plain text.
 
 Default notes: *VAT not applicable – export of services (B2B)*

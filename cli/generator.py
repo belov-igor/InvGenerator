@@ -5,7 +5,7 @@ from typing import Optional
 import json
 
 from jinja2 import Environment, FileSystemLoader
-from weasyprint import HTML
+from playwright.sync_api import sync_playwright
 
 BASE_DIR = Path(__file__).parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -90,5 +90,12 @@ def generate_pdf(invoice: Invoice, output_path: Optional[Path] = None) -> Path:
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
     html = env.get_template("invoice.html").render(invoice=invoice)
-    HTML(string=html, base_url=str(TEMPLATES_DIR)).write_pdf(str(output_path))
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.set_content(html, wait_until="networkidle")
+        page.pdf(path=str(output_path), format="A4", print_background=True)
+        browser.close()
+
     return output_path
