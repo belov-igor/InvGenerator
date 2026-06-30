@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 1.6cm 1.8cm 1.8cm 1.8cm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: DejaVu Sans, Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    color: #000;
+    line-height: 1.45;
+  }
+
+  /* ── Header: title left, meta right ── */
+  .header-tbl { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+  .header-tbl td { vertical-align: top; }
+  .header-tbl .title-cell { white-space: nowrap; padding-right: 24px; }
+  .title      { font-size: 17pt; font-weight: 700; line-height: 1.15; }
+  .inv-number { font-size: 17pt; font-weight: 700; line-height: 1.15; }
+
+  .meta-tbl { border-collapse: collapse; width: 100%; }
+  .meta-tbl td { font-size: 9.5pt; padding: 0 10px 0 0; vertical-align: top; }
+  .meta-tbl td.lbl { color: #333; white-space: nowrap; padding-bottom: 1px; }
+  .meta-tbl td.val { font-weight: 400; padding-bottom: 6px; }
+
+  /* ── Section separators ── */
+  .sep { border: none; border-top: 1px solid #000; margin: 10px 0; }
+  .sep-thin { border: none; border-top: 1px solid #000; margin: 8px 0; }
+
+  /* ── Parties ── */
+  .parties { width: 100%; border-collapse: collapse; }
+  .parties td { vertical-align: top; width: 50%; font-size: 9.5pt; line-height: 1.6; }
+  .parties td:first-child { padding-right: 20px; }
+  .party-lbl  { font-size: 9.5pt; margin-bottom: 3px; }
+  .party-name { font-size: 11pt; font-weight: 700; margin-bottom: 4px; }
+
+  /* ── Items table ── */
+  /* Gray right column = last two cols (Discount + Total) */
+  .items { width: 100%; border-collapse: collapse; }
+
+  .items thead tr {
+    border-bottom: 1px solid #000;
+  }
+  .items th {
+    font-size: 9pt;
+    font-weight: 700;
+    text-align: left;
+    padding: 5px 5px 4px 5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .items th .sub {
+    display: block;
+    font-weight: 400;
+    font-size: 7.5pt;
+    text-transform: none;
+  }
+  .items th.r { text-align: left; } /* headers left-aligned like original */
+  .items td.r { text-align: right; }
+  .items td {
+    padding: 7px 5px;
+    font-size: 9.5pt;
+    border-bottom: 1px solid #bbb;
+    vertical-align: top;
+  }
+  /* gray for rightmost columns */
+  .items th.shade, .items td.shade { background: #f0f0f0; }
+
+  /* ── Totals (tfoot inside .items table) ── */
+  .items tfoot td {
+    padding: 5px 5px;
+    font-size: 10pt;
+    font-weight: 700;
+    border-bottom: 1px solid #000;
+    vertical-align: top;
+  }
+  .items tfoot tr:first-child td { border-top: 1px solid #000; }
+  .items tfoot td.shade { text-align: right; background: #f0f0f0; white-space: nowrap; }
+  /* last row (total for payment) is also bold, already set */
+
+  /* ── Comment ── */
+  .comment { margin-top: 16px; font-size: 9.5pt; }
+  .comment .lbl { font-weight: 700; margin-bottom: 3px; }
+
+  /* ── Footer ── */
+  .footer {
+    position: fixed;
+    bottom: 1cm;
+    left: 1.8cm;
+    right: 1.8cm;
+    border-top: 1px solid #000;
+    padding-top: 4px;
+    font-size: 8pt;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<table class="header-tbl">
+  <tr>
+    <td class="title-cell">
+      <div class="title">Invoice / Faktura:</div>
+      <div class="inv-number">{{ invoice.number }}</div>
+    </td>
+    <td>
+      <table class="meta-tbl">
+        <tr>
+          <td class="lbl">Invoice date / Datum fakture</td>
+          <td style="width:40px"></td>
+          <td class="lbl">Trading date / Datum prometa</td>
+        </tr>
+        <tr>
+          <td class="val">{{ invoice.date.strftime('%d.%m.%Y') }}</td>
+          <td></td>
+          <td class="val">{{ invoice.date.strftime('%d.%m.%Y') }}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td class="lbl">Trading place / Mesto prometa</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td class="val">{{ invoice.client.country }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<hr class="sep">
+
+<!-- Parties -->
+<table class="parties">
+  <tr>
+    <td>
+      <div class="party-lbl">From / Od:</div>
+      <div class="party-name">{{ invoice.seller.name }}</div>
+      {{ invoice.seller.name }}<br>
+      {{ invoice.seller.address }}<br>
+      {{ invoice.seller.city }}<br>
+      {{ invoice.seller.country }}<br>
+      VAT / EIB / PIB: {{ invoice.seller.pib }}<br>
+      ID no / MB / Matični broj: {{ invoice.seller.maticni_broj }}<br>
+      {% if invoice.seller.iban %}IBAN: {{ invoice.seller.iban }}<br>{% endif %}
+      {% if invoice.seller.swift %}SWIFT: {{ invoice.seller.swift }}<br>{% endif %}
+      {% if invoice.seller.email %}E-mail: {{ invoice.seller.email }}{% endif %}
+    </td>
+    <td>
+      <div class="party-lbl">Bill to / Klijent:</div>
+      <div class="party-name">{{ invoice.client.name }}</div>
+      Address / Adresa: {{ invoice.client.address }}<br>
+      City / Grad: {{ invoice.client.city }}<br>
+      Country / Država: {{ invoice.client.country }}<br>
+      {% if invoice.client.vat_number %}VAT / EIB / PIB: {{ invoice.client.vat_number }}<br>{% endif %}
+      {% if invoice.client.reg_number %}ID no / MB / Matični broj: {{ invoice.client.reg_number }}{% endif %}
+      {% if invoice.reference %}<br>Reference / Poziv: {{ invoice.reference }}{% endif %}
+    </td>
+  </tr>
+</table>
+
+<hr class="sep">
+
+<!-- Items + Totals in one table for continuous gray column -->
+<table class="items">
+  <thead>
+    <tr>
+      <th>Type of service <span class="sub">(Vrsta usluge)</span></th>
+      <th style="width:12%">Unit <span class="sub">(Jedinica)</span></th>
+      <th style="width:11%">Quantity <span class="sub">(Količina)</span></th>
+      <th style="width:9%">Price <span class="sub">(Cena)</span></th>
+      <th class="shade" style="width:12%">Discount <span class="sub">(Rabat %)</span></th>
+      <th class="shade" style="width:11%">Total <span class="sub">(Ukupno)</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in invoice.items %}
+    <tr>
+      <td>{{ item.description }}</td>
+      <td>{{ item.unit }}</td>
+      <td class="r">{{ item.quantity|srb_num }}</td>
+      <td class="r">{{ item.rate|srb_num }}</td>
+      <td class="r shade">0,00</td>
+      <td class="r shade">{{ item.amount|srb_num }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4"><b>Total / Ukupno ({{ invoice.currency }})</b></td>
+      <td colspan="2" class="shade" style="text-align:right"><b>{{ invoice.total|srb_num }}</b></td>
+    </tr>
+    <tr>
+      <td colspan="4"><b>Discount / Rabat ({{ invoice.currency }})</b></td>
+      <td colspan="2" class="shade" style="text-align:right"><b>0,00</b></td>
+    </tr>
+    <tr>
+      <td colspan="4"><b>Total for payment / Ukupno za uplatu ({{ invoice.currency }})</b></td>
+      <td colspan="2" class="shade" style="text-align:right"><b>{{ invoice.total|srb_num }}</b></td>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- Comment -->
+{% if invoice.notes %}
+<div class="comment">
+  <div class="lbl">Comment / Opis usluge</div>
+  {{ invoice.notes }}
+</div>
+{% endif %}
+
+<!-- Footer -->
+<div class="footer">Page 1 from 1</div>
+
+</body>
+</html>

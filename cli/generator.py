@@ -7,6 +7,12 @@ import json
 from jinja2 import Environment, FileSystemLoader
 from playwright.sync_api import sync_playwright
 
+
+def _srb_num(value: float) -> str:
+    """Format a number in Serbian style: 1.600,00"""
+    formatted = f"{value:,.2f}"
+    return formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+
 BASE_DIR = Path(__file__).parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 INVOICES_DIR = BASE_DIR / "invoices"
@@ -84,14 +90,17 @@ class Invoice:
         return round(sum(item.amount for item in self.items), 2)
 
 
-def generate_pdf(invoice: Invoice, output_path: Optional[Path] = None) -> Path:
+def generate_pdf(invoice: Invoice, output_path: Optional[Path] = None, template: str = "default") -> Path:
     INVOICES_DIR.mkdir(exist_ok=True)
     if output_path is None:
         safe = invoice.number.replace("/", "-").replace(" ", "-")
-        output_path = INVOICES_DIR / f"invoice-{safe}.pdf"
+        suffix = f"-{template}" if template != "default" else ""
+        output_path = INVOICES_DIR / f"invoice-{safe}{suffix}.pdf"
 
+    template_file = "invoice_serbian.html" if template == "serbian" else "invoice.html"
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
-    html = env.get_template("invoice.html").render(invoice=invoice)
+    env.filters["srb_num"] = _srb_num
+    html = env.get_template(template_file).render(invoice=invoice)
 
     with sync_playwright() as p:
         browser = p.chromium.launch()

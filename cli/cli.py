@@ -36,7 +36,8 @@ def cli():
 )
 @click.option("--reference", "-r", default="", help="Payment reference number")
 @click.option("--output", "-o", default=None, help="Output PDF path")
-def create(client, number, inv_date, due_days, currency, notes, reference, output):
+@click.option("--template", "-t", default="default", type=click.Choice(["default", "serbian"]), show_default=True, help="Invoice template")
+def create(client, number, inv_date, due_days, currency, notes, reference, output, template):
     """Create a new invoice interactively."""
     try:
         seller = Seller.from_file()
@@ -88,7 +89,7 @@ def create(client, number, inv_date, due_days, currency, notes, reference, outpu
     click.echo(f"\nTotal: {currency} {invoice.total:.2f}")
 
     output_path = Path(output) if output else None
-    pdf_path = generate_pdf(invoice, output_path)
+    pdf_path = generate_pdf(invoice, output_path, template=template)
     click.secho(f"PDF saved: {pdf_path}", fg="green")
 
 
