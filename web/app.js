@@ -205,10 +205,64 @@ const NOTES_DEFAULT = {
   serbian: 'Payment deadline is 15 days',
 };
 
-const ITEM_HEADERS = {
-  default: { description: 'Description', qty: 'Qty',        unit: 'Unit',       rate: 'Rate',       amount: 'Amount'       },
-  serbian: { description: 'Description / Vrsta usluge', qty: 'Qty / Kol.', unit: 'Unit / Jed.', rate: 'Rate / Cena', amount: 'Amount / Ukupno' },
+const I18N = {
+  default: {
+    'section-details':   'Invoice Details',
+    'section-client':    'Client',
+    'section-items':     'Line Items',
+    'section-notes':     'Notes',
+    'field-inv-number':  'Invoice Number',
+    'field-date':        'Date',
+    'field-due-date':    'Due Date',
+    'field-currency':    'Currency',
+    'field-reference':   'Reference Number',
+    'field-company-name':'Company Name',
+    'field-email':       'Email',
+    'field-street-address': 'Street Address',
+    'field-city':        'City',
+    'field-country':     'Country',
+    'field-reg-number':  'Reg. Number',
+    'field-vat-number':  'VAT Number',
+    'th-description':    'Description',
+    'th-qty':            'Qty',
+    'th-unit':           'Unit',
+    'th-rate':           'Rate',
+    'th-amount':         'Amount',
+    'btn-add-line':      '+ Add line',
+    'btn-generate':      'Generate PDF',
+  },
+  serbian: {
+    'section-details':   'Invoice Details / Faktura',
+    'section-client':    'Client / Klijent',
+    'section-items':     'Line Items / Stavke',
+    'section-notes':     'Notes / Napomena',
+    'field-inv-number':  'Invoice Number / Broj fakture',
+    'field-date':        'Date / Datum',
+    'field-due-date':    'Due Date / Rok plaćanja',
+    'field-currency':    'Currency / Valuta',
+    'field-reference':   'Reference / Poziv na broj',
+    'field-company-name':'Company Name / Naziv firme',
+    'field-email':       'Email',
+    'field-street-address': 'Street Address / Adresa',
+    'field-city':        'City / Grad',
+    'field-country':     'Country / Država',
+    'field-reg-number':  'Reg. Number / Matični broj',
+    'field-vat-number':  'VAT Number / PIB',
+    'th-description':    'Description / Vrsta usluge',
+    'th-qty':            'Qty / Kol.',
+    'th-unit':           'Unit / Jed.',
+    'th-rate':           'Rate / Cena',
+    'th-amount':         'Amount / Ukupno',
+    'btn-add-line':      '+ Add line / Dodaj stavku',
+    'btn-generate':      'Generate PDF / Generiši fakturu',
+  },
 };
+
+function applyI18n(tpl) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = I18N[tpl][el.dataset.i18n] ?? el.textContent;
+  });
+}
 
 function setTemplate(tpl) {
   currentTemplate = tpl;
@@ -216,12 +270,7 @@ function setTemplate(tpl) {
   if (Object.values(NOTES_DEFAULT).includes(notesEl.value.trim())) {
     notesEl.value = NOTES_DEFAULT[tpl];
   }
-  const h = ITEM_HEADERS[tpl];
-  document.getElementById('th-description').textContent = h.description;
-  document.getElementById('th-qty').textContent         = h.qty;
-  document.getElementById('th-unit').textContent        = h.unit;
-  document.getElementById('th-rate').textContent        = h.rate;
-  document.getElementById('th-amount').textContent      = h.amount;
+  applyI18n(tpl);
 }
 
 // ── PDF Generation ────────────────────────────────────────
