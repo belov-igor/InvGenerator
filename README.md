@@ -13,6 +13,8 @@ Invoice generator for freelancers and sole proprietors. Two independent implemen
 
 No installation needed. Open the link above, fill in your seller details in ⚙ Settings (saved to localStorage), add a client card, fill in line items, click **Generate PDF**.
 
+**Templates:** toggle **EN | SRB** in the Invoice Details panel to switch between the minimalist English invoice and the bilingual Serbian/English Faktura (all form labels switch language too).
+
 **Client cards:** save/load to localStorage, export/import as JSON files — useful for keeping your own copy locally or sharing with others.
 
 **Seller settings:** also exportable as JSON — fill in once, export, re-import on any device.
@@ -63,8 +65,11 @@ cat > cli/clients/my-client.json << 'EOF'
 }
 EOF
 
-# Generate invoice (interactive line items)
+# Generate invoice — default minimalist English template
 ./cli/inv create --client my-client --number 2026-001
+
+# Bilingual Serbian/English Faktura template
+./cli/inv create --client my-client --number 2026-001 --template serbian
 
 # Options
 ./cli/inv create --client my-client --number 2026-001 --date 2026-06-01 --due-days 30
@@ -102,14 +107,17 @@ InvGenerator/
     cli.py                # Click CLI
     inv                   # wrapper script
     templates/
-      invoice.html        # Jinja2 template
+      invoice.html        # Jinja2 template — default (English)
+      invoice_serbian.html# Jinja2 template — bilingual Serbian/English
     settings.example.json
     requirements.txt      # for pip-based install
     clients/              # saved client cards (gitignored)
     invoices/             # generated PDFs (gitignored)
   web/
-    index.html            # Bootstrap form
-    app.js                # pdfmake + localStorage logic
+    index.html            # Bootstrap form with EN|SRB switcher
+    app.js                # localStorage, template switching, i18n
+    template-default.js   # pdfmake layout — default (English)
+    template-serbian.js   # pdfmake layout — bilingual Serbian/English
   pyproject.toml          # dependencies for uv
   .github/workflows/
     deploy.yml            # auto-deploy web/ to GitHub Pages on push
@@ -117,8 +125,18 @@ InvGenerator/
 
 ---
 
-## Invoice design
+## Invoice templates
 
-Minimalist A4 layout: bold "Invoice" heading, invoice metadata, seller + bill-to columns, amount due line, items table with thin rules, totals block, notes and payment details as plain text.
+### Default (EN)
+
+Minimalist A4 layout inspired by Stripe/Anthropic invoices: bold "Invoice" heading, invoice metadata, seller + bill-to columns, amount due line, items table with thin rules, totals block, notes.
 
 Default notes: *VAT not applicable – export of services (B2B)*
+
+### Serbian / Faktura (SRB)
+
+Bilingual Serbian/English layout matching the Serbian statutory Faktura form: `Invoice / Faktura` heading with invoice date + trading date/place metadata, seller + client columns, single items table with Discount and Total columns (gray background), totals rows, comment section, page footer.
+
+Numbers use Serbian format (period as thousands separator, comma as decimal: `1.600,00`). Dates use DD.MM.YYYY.
+
+Default notes: *Payment deadline is 15 days*
