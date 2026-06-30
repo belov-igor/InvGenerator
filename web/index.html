@@ -43,7 +43,15 @@
 
   <!-- Invoice Details -->
   <div class="card p-4 mb-3">
-    <div class="section-label">Invoice Details</div>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div class="section-label mb-0">Invoice Details</div>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Template">
+        <input type="radio" class="btn-check" name="template" id="tpl-default" autocomplete="off" checked onchange="setTemplate('default')">
+        <label class="btn btn-outline-secondary" for="tpl-default">Default</label>
+        <input type="radio" class="btn-check" name="template" id="tpl-serbian" autocomplete="off" onchange="setTemplate('serbian')">
+        <label class="btn btn-outline-secondary" for="tpl-serbian">Serbian / Faktura</label>
+      </div>
+    </div>
     <div class="row g-3">
       <div class="col-sm-4">
         <label class="form-label small">Invoice Number</label>
@@ -124,11 +132,11 @@
     <table class="table table-sm items-table align-middle mb-2">
       <thead>
         <tr>
-          <th>Description</th>
-          <th style="width:9%">Qty</th>
-          <th style="width:10%">Unit</th>
-          <th style="width:13%">Rate</th>
-          <th style="width:12%" class="text-end">Amount</th>
+          <th id="th-description">Description</th>
+          <th id="th-qty" style="width:9%">Qty</th>
+          <th id="th-unit" style="width:10%">Unit</th>
+          <th id="th-rate" style="width:13%">Rate</th>
+          <th id="th-amount" style="width:12%" class="text-end">Amount</th>
           <th style="width:4%"></th>
         </tr>
       </thead>
@@ -228,6 +236,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js"></script>
+<script src="template-default.js"></script>
+<script src="template-serbian.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
